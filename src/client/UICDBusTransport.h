@@ -15,7 +15,7 @@ public:
 	int send_with_reply (UISMessage *, int millis, UISMessage **, UICPeer *peer);
 	int send (UISMessage *, UICPeer *peer);
 
-	UICPeer *openPeer (const void *);
+	UICPeer *openPeer (const void *param = NULL);
 private:
 //	DBusConnection *_connection;
 };

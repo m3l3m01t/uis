@@ -3,6 +3,10 @@
 
 #include <stdint.h>
 
+#define TOUCH_ACTION_POINTER_INDEX_MASK 0xff00
+#define TOUCH_ACTION_POINTER_INDEX_SHIFT 8
+#define TOUCH_ACTION_MASK       0xff
+
 #define TOUCH_ACTION_DOWN   	0
 #define TOUCH_ACTION_UP		1
 #define TOUCH_ACTION_MOVE	2
@@ -31,7 +35,6 @@ typedef struct {
 	uint32_t x;
 	uint32_t y;
 } TouchData;
-
 
 #ifdef __cplusplus
 extern "C" {

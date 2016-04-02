@@ -44,10 +44,8 @@ void TouchModule::setContacts (EventSource *source, uint32_t count, const TouchD
 		_sources[source->getId ()] = contacts;
 	}
 
-	
-	TouchPrivData *pd = (TouchPrivData *)source->get (getId ());
 	for (uint32_t i = 0; i < count; i++) {
-		ContactData *p = new ContactData (pd, datas[i], NULL, scaleX, scaleY);
+		ContactData *p = new ContactData (d, datas[i], scaleX, scaleY);
 		contacts->push_back (p);
 	}
 }
@@ -71,7 +69,7 @@ int TouchModule::write (EventSource *source, int cmd, BaseInputData *data) {
 		switch (cmd) {
 			case UIS_CMD_INPUT: 
 				{
-					switch (data->type) {
+					switch (TOUCH_ACTION_MASK & data->type) {
 						case TOUCH_ACTION_DOWN:  {
 								clearContacts (source);
 								TouchPrivData *d = (TouchPrivData *)source->get (getId ());
@@ -93,6 +91,9 @@ int TouchModule::write (EventSource *source, int cmd, BaseInputData *data) {
 								break;
 						case TOUCH_ACTION_POINTER_UP:
 							{
+								setContacts (source, data->count, idata->contacts);
+								
+								int index = (data->type & TOUCH_ACTION_POINTER_INDEX_MASK) >> TOUCH_ACTION_POINTER_INDEX_SHIFT;
 								clearContact (source, idata->contacts);
 								flushContacts ();
 							}
@@ -109,7 +110,7 @@ int TouchModule::write (EventSource *source, int cmd, BaseInputData *data) {
 		switch (cmd) {
 			case UIS_CMD_INPUT: 
 				{
-					switch (data->type) {
+					switch (TOUCH_ACTION_MASK & data->type) {
 						case TOUCH_ACTION_DOWN:   /* fall-through */
 						case TOUCH_ACTION_POINTER_DOWN:
 							{

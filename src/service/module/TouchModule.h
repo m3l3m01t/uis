@@ -11,25 +11,9 @@
 #include "TouchDevice.h"
 
 #include "uis/device/touch-data.h"
+#include "uis/common/InputData.h"
 
 using namespace std;
-
-typedef struct {
-	int32_t x;
-	int32_t y;
-} IPoint;
-
-typedef struct {
-	uint32_t width;
-	uint32_t height;
-} Size;
-
-typedef struct {
-	int32_t left;
-	int32_t top;
-	int32_t right;
-	int32_t bottom;
-} IRect;
 
 
 class TouchPrivData : public ModulePrivData {
@@ -46,12 +30,18 @@ public:
 		LOG_DEBUG ("set touchscreen rect to (%d,%d - %d,%d)", rect->left, rect->top, rect->right, rect->bottom);
 		_size.width = rect->right - rect->left;
 		_size.height = abs (rect->bottom - rect->top);
+		_orig.x = rect->left;
+		_orig.y = rect->top;
 
 		return 0;
 	}
 
 	const Size &getSize () const {
 		return _size;
+	}
+
+	const IPoint &getOrig () const {
+		return _orig;
 	}
 
 	void updateTrackId () {	
@@ -70,27 +60,36 @@ public:
 		return _trackId | (uint16_t)id;
 	}
 protected:
+	TouchPrivData  () {
+		_size.width = 0;
+		_size.height = 0;
+		_orig.x = 0;
+		_orig.y = 0;
+	}
+
 	friend class TouchModule;
 
 	Size _size;
+	IPoint _orig;
+
 	uint32_t _trackId;
 };
 
 //typedef TouchData ContactData;
 class ContactData: public TouchData {
 public:
-	ContactData (const TouchPrivData *data, const TouchData& d, const IPoint *offset = NULL, float xscale = 1.0f, float yscale = 1.0f) {
+	ContactData (const TouchPrivData *data, const TouchData& d,  float xscale = 1.0f, float yscale = 1.0f) {
+
 		this->trackingId = data->getTrackId (d.trackingId);
 		this->pressure = d.pressure;
 
-		IPoint off = {0, 0};
-		if (offset) {
-			off = *offset;
-		}
-		this->x = d.x * xscale + off.x;
-		this->y = d.y * yscale + off.y;
-	};
+		const IPoint &off = data->getOrig ();
 
+		LOG_DEBUG ("Contact xscale %f, yscale %f, (%d,%d)", xscale, yscale, d.x, d.y);
+		/* translate position in display to that in touchscreen */
+		this->x = (d.x - off.x) * xscale;
+		this->y = (d.y - off.y) * yscale;
+	};
 };
 
 typedef struct {

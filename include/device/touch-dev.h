@@ -14,9 +14,9 @@ typedef enum {MT_PROTOCOL_INVALID = 0, MT_PROTOCOL_A = 1, MT_PROTOCOL_B = 2} MT_
 typedef enum {TOUCHDEV_RESOLUTION_GET = 0, TOUCHDEV_SCREEN_RESOLUTION_SET, TOUCHDEV_PROTOCOL_GET} TOUCHDEV_CTRL_CMD;
 
 typedef struct {
-	uint32_t x;
-	uint32_t y;
-} Point;
+	int32_t x;
+	int32_t y;
+} IPoint;
 
 #ifdef __cplusplus
 extern "C" {

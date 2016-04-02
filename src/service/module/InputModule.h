@@ -17,8 +17,11 @@ public:
 		return ((_type & type) == type);
 	};
 
-	ModuleId getId () { return _id; };
-	const char *getName () { return _name; };
+	ModuleId getId () { return _id; }
+
+	const char *getName () {
+		return _dev->getDeviceName ();
+	}
 
 	virtual int attach (EventSource *source) {
 		ModulePrivData *data = source->get (_id);
@@ -27,7 +30,7 @@ public:
 		}
 
 		return 0;
-	};
+	}
 
 	virtual void detach (EventSource *source)  {
 		ModulePrivData * data = source->erase (_id);
@@ -49,7 +52,6 @@ protected:
 	virtual void freePrivData (ModulePrivData *) = 0;
 
 protected:
-	char _name[64];
 	
 	DeviceType _type;
 	AbstractInputDev *_dev;	

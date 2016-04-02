@@ -22,6 +22,7 @@ UICPeer *UICDBusTransport::openPeer (const void *) {
 	dbus_error_init (&err);
 	DBusConnection *connection;
 	//connection = dbus_connection_open (UIS_DBUS_SERVICE_NAME, &err);
+
 	connection = dbus_bus_get (DBUS_BUS_SYSTEM, &err);
 	if (dbus_error_is_set (&err)) {
 		LOG_ERROR ("cannot open DBUS connection:%s", err.message);

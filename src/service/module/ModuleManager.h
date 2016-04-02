@@ -24,13 +24,17 @@ class ModuleManager :
       return NULL;
     }
 
-    InputModule *getModuleByType (uint32_t deviceClass) {
+    InputModule *getModuleByType (uint32_t deviceClass, const char *keyword = NULL) {
       map <ModuleId, InputModule *>::iterator iter;
 
       for (iter = _ids.begin (); iter != _ids.end (); iter ++) {
         InputModule *module = iter->second;
 
         if (module->isDeviceSupport ((DeviceType) deviceClass)) {
+          if (keyword && strstr (module->getName (), keyword) == NULL) {
+            LOG_DEBUG ("module \"%s\" doesn't contain keyword %s", module->getName (), keyword);
+            continue;
+          }
           LOG_INFO ("found already opened module 0x%08x", module->getId ());
           return module;
         }
@@ -43,7 +47,7 @@ class ModuleManager :
         return NULL;
       }
 
-      AbstractInputDev *device = InputDevFactory::getDevice (deviceClass);
+      AbstractInputDev *device = InputDevFactory::getDevice (deviceClass, keyword);
       if (device == NULL) {
         LOG_ERROR ("cannot find deviceClass: 0x%08x", deviceClass);
         return NULL;
@@ -56,7 +60,7 @@ class ModuleManager :
       return module;
     }
 
-    static InputModule *getModule (uint32_t moduleId, uint32_t deviceClass) {
+    static InputModule *getModule (uint32_t moduleId, uint32_t deviceClass, const char *keyword = NULL) {
       if (moduleId == MODULE_ID_INVALID && deviceClass == INPUT_DEVICE_CLASS_UNKNOWN) {
         return NULL;
       }
@@ -66,7 +70,7 @@ class ModuleManager :
         return mm->get (moduleId);
       }
 
-      return mm->getModuleByType (deviceClass);
+      return mm->getModuleByType (deviceClass, keyword);
     }
 #if 0
     /* create new InputModule by factory, and stores in an id/module map */

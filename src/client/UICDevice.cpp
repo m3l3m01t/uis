@@ -2,10 +2,37 @@
 #include "UICDevice.h"
 #include "UICPeer.h"
 
-int UICDevice::open () {
-  BaseInputData *data = BID_alloc (0, 1, sizeof (_deviceType), &_deviceType);
+int UICDevice::open (const char *keyword) {
+  BaseInputData *data  = NULL;
+  OpenDeviceBody *body = NULL;
+
+  int16_t len = 0;
+
+	LOG_DEBUG ("open device with keyword \"%s\"", keyword ? keyword : "");
+  if ((keyword == NULL) || (strlen (keyword) == 0)) {
+    body = (OpenDeviceBody*) malloc (sizeof (OpenDeviceBody)); 
+    body->len = 0;
+  } else {
+    len = (int16_t)strlen (keyword);
+    body = (OpenDeviceBody*) malloc (sizeof (OpenDeviceBody) + len); 
+
+    memset (body->keyword, 0, len);
+    strncpy (body->keyword, keyword, len);
+
+    body->len = len;
+  
+    LOG_DEBUG ("keyword \"%s\", len %d", keyword, len);
+  }
+
+  body->devtype = _deviceType;
+  
+  data = BID_alloc (0, 1, sizeof (OpenDeviceBody) + len, body);
+
+  free (body);
 
   UISMessage *rsp = NULL;
+
+  LOG_DEBUG ("sending request");
   if (_peer->write_with_reply (UIS_CMD_OPEN_DEVICE, data, this, -1, &rsp) == 0) {
     uint32_t buf[2];
 
@@ -24,6 +51,8 @@ int UICDevice::open () {
       }
     }
   }
+
+  LOG_WARN ("request failed");
   return -1;
 }
 

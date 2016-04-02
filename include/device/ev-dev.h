@@ -65,7 +65,7 @@ typedef enum INPUT_DEVICE_CLASS {
 typedef struct {
 	char name[128];  /* event device pathname */
 	char devname[128];
-	char id[128];
+	struct input_id id;
 
 	int version;
 
@@ -132,7 +132,7 @@ int ev_dev_unref (EvDev *dev);
 
 DeviceType ev_dev_get_class (EvDev *dev);
 const char *ev_dev_get_name (EvDev *dev);
-const char *ev_dev_get_id (EvDev *dev);
+void ev_dev_get_id (EvDev *dev, struct input_id *id);
 
 
 #ifdef __cplusplus

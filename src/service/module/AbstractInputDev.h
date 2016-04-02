@@ -35,9 +35,11 @@ public:
 		return ev_dev_get_name (getEvDev());
 	}
 
-	const char *getDeviceId () {
-		return ev_dev_get_id (getEvDev());
+#if 0
+	void getDeviceId (struct input_id *id) {
+		ev_dev_get_id (getEvDev(), id);
 	}
+#endif
 
 protected:
 	BaseEvDev *getBED () {
@@ -71,7 +73,7 @@ public:
 			return NULL;
 		}
 	}
-	static AbstractInputDev *getDevice (uint32_t deviceClass) {
+	static AbstractInputDev *getDevice (uint32_t deviceClass, const char *keyword = NULL) {
 		if (!_scaned) {
 			if (scanDevices () <= 0) {
 				return NULL;
@@ -79,16 +81,23 @@ public:
 			_scaned = true;
 		}
 
-		map<DeviceType, EvDev *>::iterator iter;
+		multimap<DeviceType, EvDev *>::iterator iter;
 
 		LOG_DEBUG ("looking for EvDev supports class: 0x%08x", deviceClass);
 		for (iter = _devices.begin (); iter != _devices.end (); iter ++) {
 			LOG_DEBUG ("checking deviceClass 0x%08x", iter->first);
 			if ((iter->first & deviceClass) == deviceClass) {
 				/* one EvDev represents an event? device, shared by all AbstractInputDev instance created from it */
+				
+				EvDev *evdev = iter->second;
+
+				if (keyword && strstr (evdev->devname, keyword) == NULL) {
+					LOG_DEBUG ("device \"%s\" doesn't contain keyword %s", evdev->devname, keyword);
+					continue;
+				}
 
 				LOG_DEBUG ("creating AbstractInputDev from EvDev %p", iter->second);
-				AbstractInputDev *dev = create (iter->second);
+				AbstractInputDev *dev = create (evdev);
 				if (dev != NULL) {
 					return dev;
 				}
@@ -124,12 +133,18 @@ protected:
 	
 				EvDev *evdev = (EvDev *)malloc (sizeof (EvDev));
 				if (ev_dev_open (devname, evdev) == 0) {
+#if 0
+// map
 					if (_devices.count ((DeviceType)evdev->classes)) {
 						if (ev_dev_unref (evdev) == 0)
 							free (evdev);
 					} else {
 						_devices[(DeviceType)evdev->classes] = evdev;
 					}
+#else
+// multimap
+					_devices.insert (pair<DeviceType, EvDev *>(evdev->classes, evdev));
+#endif
 				}
 			}
 		}
@@ -144,7 +159,7 @@ protected:
 protected:
 
 	static map<DeviceType, InputDevFactory*>  _factories;
-	static map<DeviceType, EvDev *>  _devices;
+	static multimap<DeviceType, EvDev *>  _devices;
 	static bool _scaned;
 
 	const static char *INPUT_DIR;

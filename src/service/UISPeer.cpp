@@ -29,11 +29,36 @@ UISMessage *UISPeer::handle (UISMessage *req) {
         ModuleId moduleId = MODULE_ID_INVALID;
         uint32_t buf[2] = {SOURCE_ID_INVALID, MODULE_ID_INVALID};
 
-        memcpy (&buf, req->getData()->body, sizeof (uint32_t));
+        InputModule *module = NULL;
 
-        InputModule *module = ModuleManager::getModule (moduleId, buf[0]);
+				uint32_t devtype;
+				char keyword[64];
+				
+        //memcpy (&devtype, req->getData()->body, sizeof (uint32_t));
+				OpenDeviceBody body;
+				memcpy (&body,  req->getData()->body, sizeof (OpenDeviceBody));
+				devtype = body.devtype;
+	
+				if (req->getData()->body_len > sizeof (OpenDeviceBody)) {
+					int16_t len;
+
+					/* FIXME, endian */
+					len = body.len;
+					LOG_DEBUG ("sizeof structure %d, body len %d", sizeof (OpenDeviceBody), len);
+
+					if ((len < (int16_t)sizeof (keyword)) && (len + sizeof (OpenDeviceBody) == req->getData()->body_len)) {
+						memset (keyword, 0, sizeof (keyword));
+						memcpy (keyword, req->getData()->body + sizeof (OpenDeviceBody), len);
+						LOG_DEBUG ("open module by type 0x%08x, keyword \"%s\"", devtype, keyword);
+						module = ModuleManager::getModule (moduleId, devtype, keyword);
+					} else {
+						LOG_ERROR ("invalid OpenDeviceBody, body_len %d, len %d", req->getData()->body_len, len);
+					}
+				} else {
+					module = ModuleManager::getModule (moduleId, devtype, NULL);
+				}
         if (module != NULL) {
-					LOG_INFO ("found module by module Id 0x%08x, type 0x%08x", moduleId, buf[0]);
+					LOG_INFO ("found module by module Id 0x%08x, type 0x%08x", moduleId, devtype);
           EventSource *source = sm->get (sourceId);
 					if (source == NULL) {
 						source = sm->createSource (sourceId);
@@ -47,7 +72,7 @@ UISMessage *UISPeer::handle (UISMessage *req) {
 
 					LOG_INFO ("sourceId 0x%08x, moduleId 0x%08x", buf[0], buf[1]);
 				} else {
-					LOG_ERROR ("cannot find module by Id 0x%08x, type 0x%08x", moduleId, buf[0]);
+					LOG_ERROR ("cannot find module by Id 0x%08x, type 0x%08x", moduleId, devtype);
 					buf[1]  = MODULE_ID_INVALID;
 				}
 

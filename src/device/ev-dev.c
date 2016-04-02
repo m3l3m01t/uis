@@ -92,8 +92,11 @@ int ev_dev_open (const char *name, EvDev *dev) {
 
 	dev->ref = 1;
 
-	LOG_INFO ("device %s: version %d, id %s, name %s, class 0x%08x", name, 
-			dev->version, dev->id, dev->name, dev->classes);
+	LOG_INFO ("device %s: version %d, name %s, class 0x%08x", name, 
+			dev->version, dev->name, dev->classes);
+	LOG_INFO ("vendor %04hx product %04hx version %04hx",
+			dev->id.vendor, dev->id.product,
+			dev->id.version);
 	return 0;
 }
 
@@ -135,8 +138,8 @@ const char *ev_dev_get_name (EvDev *dev) {
 	return dev->devname;
 }
 
-const char *ev_dev_get_id (EvDev *dev) {
-	return dev->id;
+void ev_dev_get_id (EvDev *dev, struct input_id *id) {
+	memcpy (id, &dev->id, sizeof (struct input_id));
 }
 
 int ev_dev_write (EvDev *dev, const struct input_event *ev, int size) {

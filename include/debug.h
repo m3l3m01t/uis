@@ -13,6 +13,9 @@
 #define ON_PANIC() abort()
 #endif
 
+#ifdef __GNUC__
+#define ATTR_PACKED __attribute__ ((__packed__))
+#endif
 
 enum {
   LOG_UNKNOWN,

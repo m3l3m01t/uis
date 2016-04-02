@@ -16,7 +16,7 @@ typedef uint32_t ModuleId;
  */
 class UICDevice {
 public:
-	int open ();
+	int open (const char *keyword = NULL);
 
 	int write (uint32_t cmd, BaseInputData *data);
 

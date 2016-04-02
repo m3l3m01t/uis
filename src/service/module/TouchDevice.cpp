@@ -9,7 +9,7 @@ TouchDevice::TouchDevice (InputDev *dev):
 {
 	touch_dev_ctrl (getBED(), TOUCHDEV_RESOLUTION_GET, &_width, &_height);
 	touch_dev_ctrl (getBED(), TOUCHDEV_PROTOCOL_GET, &_proto);
-	LOG_DEBUG ("touch device protocol %d", _proto);
+	LOG_DEBUG ("touch device protocol %d, width %d, height %d", _proto, _width, _height);
 }
 
 int TouchDevice::ctrl (int cmd, ...) {

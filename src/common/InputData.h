@@ -26,6 +26,19 @@ extern "C" {
 #define KBD_CMD_KEY_PRESS 	0x2
 
 typedef struct {
+	uint32_t width;
+	uint32_t height;
+} Size;
+
+typedef struct {
+	int32_t left;
+	int32_t top;
+	int32_t right;
+	int32_t bottom;
+} IRect;
+
+
+typedef struct {
 	uint16_t type;
 	uint16_t count;
 	uint32_t body_len;
@@ -43,6 +56,13 @@ typedef struct {
 	uint16_t value;
 } KeyPressBody;
 
+typedef struct ATTR_PACKED {
+	uint32_t devtype;
+	int16_t  len;
+//	int16_t  reserved;
+	char     keyword[0];
+} OpenDeviceBody;
+
 typedef struct {
 	BaseInputData head;
 	union {
@@ -50,6 +70,7 @@ typedef struct {
 		KeyPressBody keys[0];
 	};
 } KeyInputData;
+
 
 #define BID_HEADER_LEN sizeof(BaseInputData)
 static BaseInputData *BID_alloc (uint16_t type, uint16_t count, uint32_t bodyLen, const void *p) {

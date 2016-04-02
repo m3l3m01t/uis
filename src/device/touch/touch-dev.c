@@ -26,7 +26,7 @@ typedef struct {
 	struct input_absinfo x_absinfo;
 	struct input_absinfo y_absinfo;
 	
-	Point screen_size;
+	IPoint screen_size;
 } TSD;
 
 typedef struct {
@@ -255,7 +255,7 @@ static int get_abs_info (EvDev *evdev, uint32_t axis, struct input_absinfo *info
 	if (info->maximum) {
 		LOG_INFO  ("touchscreen axis %u range: [%u, %u]", axis, info->minimum, info->maximum);
 	} else {
-		LOG_INFO ("touchscreen axis %u has no ymax: using emulator mode", axis);
+		LOG_INFO ("touchscreen axis %u has range: using emulator mode", axis);
 	}
 
 	return 0;
@@ -291,6 +291,8 @@ BaseEvDev *touch_dev_new (EvDev *evdev) {
 
 		get_abs_info (evdev, ABS_Y, &tsd->y_absinfo);
 		tsd->screen_size.y = tsd->y_absinfo.maximum - tsd->y_absinfo.minimum;
+
+		LOG_DEBUG ("touch screen size %dx%d", tsd->screen_size.x, tsd->screen_size.y);
 	}
 
 	return (BaseEvDev *)bed;
