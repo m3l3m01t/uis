@@ -7,15 +7,15 @@
 
 #include <uis/debug.h>
 
-static int containsNonZeroByte(const uint8_t* array, uint32_t startIndex, uint32_t endIndex) {
+static int all_zero(const uint8_t* array, uint32_t startIndex, uint32_t endIndex) {
     const uint8_t* end = array + endIndex;
     array += startIndex;
     while (array != end) {
         if (*(array++) != 0) {
-            return 1;
+            return 0;
         }
     }
-    return 0;
+    return 1;
 }
 
 
@@ -81,11 +81,11 @@ int ev_dev_open (const char *name, EvDev *dev) {
 
         // See if this is a keyboard.  Ignore everything in the button range except for
         // gamepads which are also considered keyboards.
-        if (containsNonZeroByte(dev->key_bitmask, 0, sizeof_bit_array(BTN_MISC))
-                || containsNonZeroByte(dev->key_bitmask, sizeof_bit_array(BTN_GAMEPAD),
+        if (!(all_zero(dev->key_bitmask, 0, sizeof_bit_array(BTN_MISC))
+                && all_zero(dev->key_bitmask, sizeof_bit_array(BTN_GAMEPAD),
                         sizeof_bit_array(BTN_DIGI))
-                || containsNonZeroByte(dev->key_bitmask, sizeof_bit_array(KEY_OK),
-                        sizeof_bit_array(KEY_MAX + 1))) {
+                && all_zero(dev->key_bitmask, sizeof_bit_array(KEY_OK),
+                        sizeof_bit_array(KEY_MAX + 1)))) {
             dev->classes |= INPUT_DEVICE_CLASS_KEYBOARD;
         }
 
@@ -130,19 +130,19 @@ int ev_dev_unref (EvDev *dev) {
 	return dev->ref;
 }
 
-DeviceType ev_dev_get_class (EvDev *dev) {
+DeviceType ev_dev_get_class (const EvDev *dev) {
 	return (DeviceType) dev->classes;
 }
 
-const char *ev_dev_get_name (EvDev *dev) {
+const char *ev_dev_get_name (const EvDev *dev) {
 	return dev->devname;
 }
 
-void ev_dev_get_id (EvDev *dev, struct input_id *id) {
+void ev_dev_get_id (const EvDev *dev, struct input_id *id) {
 	memcpy (id, &dev->id, sizeof (struct input_id));
 }
 
-int ev_dev_write (EvDev *dev, const struct input_event *ev, int size) {
+int ev_dev_write (const EvDev *dev, const struct input_event *ev, int size) {
 	int result = write(dev->fd, ev, size);
 	if (result == -1) {
 		LOG_ERROR ("write event failed, %s\n", strerror(errno));

@@ -124,15 +124,15 @@ struct _InputDev {
 extern "C" {
 #endif
 int ev_dev_open (const char *pathname, EvDev *dev);
-int ev_dev_write (EvDev *dev, const struct input_event *ev, int size);
+int ev_dev_write (const EvDev *dev, const struct input_event *ev, int size);
 #define ev_dev_ioctl(dev, cmd, ...) ioctl (dev->fd, cmd, __VA_ARGS__)
 
 EvDev *ev_dev_ref (EvDev *dev);
 int ev_dev_unref (EvDev *dev);
 
-DeviceType ev_dev_get_class (EvDev *dev);
-const char *ev_dev_get_name (EvDev *dev);
-void ev_dev_get_id (EvDev *dev, struct input_id *id);
+DeviceType ev_dev_get_class (const EvDev *dev);
+const char *ev_dev_get_name (const EvDev *dev);
+void ev_dev_get_id (const EvDev *dev, struct input_id *id);
 
 
 #ifdef __cplusplus
